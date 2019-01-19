@@ -2,10 +2,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import List
 
-#TODO: Information Gain function
+
+# TODO: Information Gain function
 def Information_Gain(S, branches):
     # branches: List[List[any]]
     # return: float
+    pass
 
 
 # TODO: implement reduced error pruning
@@ -13,6 +15,7 @@ def reduced_error_pruning(decisionTree, X_test, y_test):
     # decisionTree
     # X_test: List[List[any]]
     # y_test: List[any]
+    pass
 
 
 # print current tree
@@ -31,15 +34,16 @@ def print_tree(decisionTree, node=None, name='branch 0', indent='', deep=0):
     if node.splittable:
         print(indent + '\tsplit by dim {:d}'.format(node.dim_split))
         for idx_child, child in enumerate(node.children):
-            print_tree(decisionTree, node=child, name='\t' + name + '->' + str(idx_child), indent=indent + '\t', deep=deep+1)
+            print_tree(decisionTree, node=child, name='\t' + name + '->' + str(idx_child), indent=indent + '\t',
+                       deep=deep + 1)
     else:
         print(indent + '\tclass:', node.cls_max)
     print(indent + '}')
 
 
-#KNN Utils
+# KNN Utils
 
-#TODO: implement F1 score
+# TODO: implement F1 score
 def f1_score(real_labels: List[int], predicted_labels: List[int]) -> float:
     """
     f1 score: https://en.wikipedia.org/wiki/F1_score
@@ -47,25 +51,39 @@ def f1_score(real_labels: List[int], predicted_labels: List[int]) -> float:
     assert len(real_labels) == len(predicted_labels)
 
     raise NotImplementedError
-    
-    
-#TODO: Euclidean distance, inner product distance, gaussian kernel distance and cosine similarity distance
+
+
+# TODO: Euclidean distance, inner product distance, gaussian kernel distance and cosine similarity distance
 
 def euclidean_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    return np.linalg.norm(p1 - p2)
 
 
 def inner_product_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    return np.inner(p1, p2)
 
 
 def gaussian_kernel_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    return -np.exp(-np.linalg.norm(p1 - p2))
 
 
 def cosine_sim_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
-    
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    sum_yy = (p2 ** 2).sum(1)
+    sum_xx = (p1 ** 2).sum(1, keepdims=1)
+    # sum_yy = (p2 ** 2).sum()
+    # sum_xx = (p1 ** 2).sum()
+    sum_xy = p1.dot(p2.T)
+    return (sum_xy / np.sqrt(sum_xx)) / np.sqrt(sum_yy)
+
+
 class NormalizationScaler:
     def __init__(self):
         pass
