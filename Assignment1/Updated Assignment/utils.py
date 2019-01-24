@@ -43,26 +43,69 @@ def print_tree(decisionTree, node=None, name='branch 0', indent='', deep=0):
 #TODO: implement F1 score
 def f1_score(real_labels: List[int], predicted_labels: List[int]) -> float:
     assert len(real_labels) == len(predicted_labels)
-    raise NotImplementedError
+    tp, fp, fn = 0, 0, 0
+    for real, pred in zip(real_labels, predicted_labels):
+        if real == pred:
+            tp += 1
+        else:
+            fp += 1
+            fn += 1
+
+    set_real_labels = set(real_labels)
+    set_predicted_labels = set(predicted_labels)
+
+    # tp = len(set_real_labels & set_predicted_labels)
+    # fp = len(set_predicted_labels) - tp
+    # fn = len(set_real_labels) - tp
+    if tp > 0:
+        precision = float(tp) / (tp + fp)
+        recall = float(tp) / (tp + fn)
+        return 2 * ((precision * recall) / (precision + recall))
+    else:
+        return 0.0
+    # return np.mean([f1_score_single(x, y) for x, y in zip(real_labels, predicted_labels)])
+
+
+# def f1_score_single(y_true, y_pred):
+#     y_true = set(y_true)
+#     y_pred = set(y_pred)
+#     cross_size = len(y_true & y_pred)
+#     if cross_size == 0: return 0.
+#     p = 1. * cross_size / len(y_pred)
+#     r = 1. * cross_size / len(y_true)
+#     return 2 * p * r / (p + r)
 
 #TODO:
 def euclidean_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    return np.linalg.norm(p1 - p2)
 
 
 #TODO:
 def inner_product_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    return np.inner(p1, p2)
 
 
 #TODO:
 def gaussian_kernel_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    return -np.exp(-np.linalg.norm(p1 - p2))
 
 
 #TODO:
 def cosine_sim_distance(point1: List[float], point2: List[float]) -> float:
-    raise NotImplementedError
+    p1 = np.array(point1, dtype=np.float64)
+    p2 = np.array(point2, dtype=np.float64)
+    sum_yy = (p2 ** 2).sum(1)
+    sum_xx = (p1 ** 2).sum(1, keepdims=1)
+    # sum_yy = (p2 ** 2).sum()
+    # sum_xx = (p1 ** 2).sum()
+    sum_xy = p1.dot(p2.T)
+    return 1 - ((sum_xy / np.sqrt(sum_xx)) / np.sqrt(sum_yy))
 
 
 # TODO: select an instance of KNN with the best f1 score on validation dataset
