@@ -20,15 +20,17 @@ class KNN:
     #TODO: Complete the training function
     def train(self, features: List[List[float]], labels: List[int]):
         #raise NotImplementedError
-        
+        self.feat = features
+        self.labels = labels
     
     #TODO: Complete the prediction function
     def predict(self, features: List[List[float]]) -> List[int]:
-        #raise NotImplementedError
-        
+        raise NotImplementedError
+
     #TODO: Complete the get k nearest neighbor function
-    def get_k_neighbors(self, point):
+    def get_k_neighbors(self, point:[List[float]]) -> List[int]:
         #raise NotImplementedError
+
         
     #TODO: Complete the model selection function where you need to find the best k     
     def model_selection_without_normalization(distance_funcs, Xtrain, ytrain, f1_score, Xval, yval, Xtest, ytest):
