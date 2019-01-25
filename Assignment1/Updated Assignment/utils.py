@@ -184,7 +184,7 @@ def model_selection_with_transformation(distance_funcs, scaling_classes, Xtrain,
     SORT_ORDER_SCALAR = {"min_max_scale": 0, "normalize": 1}
     majority.sort(key=lambda val: SORT_ORDER_SCALAR[val[1]])
 
-    majority = filter_ties(max_f1)
+    majority = filter_ties(majority)
 
     SORT_ORDER = {"euclidean": 0, "gaussian": 1, "inner_prod": 2, "cosine_dist": 3}
     majority.sort(key=lambda val: SORT_ORDER[val[2]])
