@@ -8,7 +8,34 @@ def Information_Gain(S, branches):
     # S: float
     # branches: List[List[int]] num_branches * num_cls
     # return: float
-    raise NotImplementedError
+    sum_branches = []
+    entropy_branches = []
+    for branch in branches:
+        sum_branch = sum(branch)
+        entropy_branches.append(calc_entropy(branch, sum_branch))
+        sum_branches.append(sum_branch)
+    total_sum_branches = sum(sum_branches)
+
+    if total_sum_branches == 0:
+        return 0.0
+
+    info_children = 0.0
+    for sum_b, entropy_b in zip(entropy_branches, sum_branches):
+        info_children += (sum_b/total_sum_branches)*entropy_b
+
+    return float(S-info_children)
+
+
+def calc_entropy(branch, sum_branch):
+    entropy = 0.0
+    for item in branch:
+        if sum_branch == 0:
+            probability = 0
+        else:
+            probability = item / sum_branch
+        if probability != 0:
+            entropy += -(probability * np.log2(probability))
+    return entropy
 
 
 # TODO: implement reduced error prunning function, pruning your tree on this function

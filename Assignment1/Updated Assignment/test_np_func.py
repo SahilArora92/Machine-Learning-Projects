@@ -98,12 +98,9 @@ if __name__ == "__main__":
     # test_most_freq()
     # print(test_model_selection())
     # print(test_transform_model_selection())
- #   print(test_normalization_scalar(input_feature))
+    # print(test_normalization_scalar(input_feature))
 
     # print(test_min_max_scalar(input_feature2))
     obj = MinMaxScaler()
     print(obj(call1_feature))
     print(obj(call2_feature))
-
-    #print(obj(call3_feature))
-    #print(obj(call2_feature))

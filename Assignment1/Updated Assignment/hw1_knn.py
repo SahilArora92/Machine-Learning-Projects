@@ -63,7 +63,7 @@ class KNN:
         dis = []
         for curr_feat, curr_label in zip(self.feat, self.labels):
             dis.append((self.distance_function(curr_feat, point), curr_label))
-        sorted(dis)
+        dis.sort()
         k_near_neighbor = [x[1] for x in dis]
         return k_near_neighbor[:self.k]
 
