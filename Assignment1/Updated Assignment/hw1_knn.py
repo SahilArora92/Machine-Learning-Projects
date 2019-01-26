@@ -5,6 +5,7 @@ from typing import List
 import numpy as np
 import scipy
 
+
 ############################################################################
 # DO NOT MODIFY ABOVE CODES
 ############################################################################
@@ -31,12 +32,6 @@ class KNN:
         for test_feat_point in features:
             majority_labels.append(self.most_frequent(self.get_k_neighbors(test_feat_point)))
         return majority_labels
-        # res = []
-        # test_data_points= len(features)
-        # for i in range(test_data_points):
-        #     k_labels = Counter(self.get_k_neighbors(features[i]))
-        #     res.append(k_labels.most_common(1)[0][0])
-        # return res
 
     def most_frequent(self, labels: List[int]):
 
