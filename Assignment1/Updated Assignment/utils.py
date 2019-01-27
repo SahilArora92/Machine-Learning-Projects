@@ -220,13 +220,17 @@ def model_selection_with_transformation(distance_funcs, scaling_classes, Xtrain,
 
 
 def filter_ties(max_f1):
-    majority = [max_f1[0]]
-    index = 1
-    for next_row in max_f1[1:]:
-        if majority[0][0] == next_row[0]:
-            majority.append(max_f1[index])
-        index += 1
-    return majority
+    if max_f1:
+        majority = [max_f1[0]]
+        index = 1
+        for next_row in max_f1[1:]:
+            if majority[0][0] == next_row[0]:
+                majority.append(max_f1[index])
+            index += 1
+        return majority
+    else:
+        return max_f1
+
 
 
 class NormalizationScaler:

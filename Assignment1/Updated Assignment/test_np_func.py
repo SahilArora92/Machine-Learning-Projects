@@ -5,6 +5,33 @@ from hw1_knn import KNN
 from data import data_processing
 from typing import List
 from utils import NormalizationScaler, MinMaxScaler
+import data
+import hw1_dt as decision_tree
+import utils as Utils
+from sklearn.metrics import accuracy_score
+
+
+def test_tree():
+    features, labels = data.sample_decision_tree_data()
+    # build the tree
+    dTree = decision_tree.DecisionTree()
+    dTree.train(features, labels)
+    # print
+    Utils.print_tree(dTree)
+
+
+def test_big_tree():
+    # load data
+    X_train, y_train, X_test, y_test = data.load_decision_tree_data()
+
+    # set classifier
+    dTree = decision_tree.DecisionTree()
+
+    # training
+    dTree.train(X_train.tolist(), y_train.tolist())
+
+    # print
+    Utils.print_tree(dTree)
 
 scaling_classes = {
     'min_max_scale': MinMaxScaler,
@@ -101,6 +128,8 @@ if __name__ == "__main__":
     # print(test_normalization_scalar(input_feature))
 
     # print(test_min_max_scalar(input_feature2))
-    obj = MinMaxScaler()
-    print(obj(call1_feature))
-    print(obj(call2_feature))
+    # obj = MinMaxScaler()
+    # print(obj(call1_feature))
+    # print(obj(call2_feature))
+    test_big_tree()
+    # test_tree()
