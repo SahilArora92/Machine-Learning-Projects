@@ -25,6 +25,8 @@ class DecisionTree():
         # features: List[List[any]]
         # return List[int]
         y_pred = []
+        if type(features) is np.ndarray:
+            features = features.tolist()
         for idx, feature in enumerate(features):
             pred = self.root_node.predict(feature)
             y_pred.append(pred)
@@ -95,19 +97,13 @@ class TreeNode(object):
                 col_index += 1
             info_gain_all_features.sort(key=lambda tup: tup[0], reverse=True)
 
-            # # check for ties
-            # if len(info_gain_all_features) > 1:
-            #     if info_gain_all_features[0][0] > info_gain_all_features[1][0]:
-            #         self.assign_selected_feature(info_gain_all_features[0])
-            #     else:
-
-            # filter ties
-
+            # base case if no features left
             if not info_gain_all_features:
                 if self.dim_split is None:
                     self.splittable = False
                 return
 
+            # filter ties
             info_gain_all_features = Util.filter_ties(info_gain_all_features)
 
             info_gain_all_features.sort(key=lambda tup: tup[1], reverse=True)
@@ -129,16 +125,9 @@ class TreeNode(object):
                 for row_feat, row_labels in zip(self.features, self.labels):
                     if feat_val_extract == row_feat[self.dim_split]:
                         temp_row_feat = row_feat[:]
-
                         temp_row_feat.pop(self.dim_split)
-                        # if not temp_row_feat and np.unique(self.labels).size > 1:
-                        #     temp_row_feat.append(popped_item)
                         extract_feat.append(temp_row_feat)
                         extract_labels.append(row_labels)
-
-                # if np.unique(extract_labels).size > 1 and is_list_empty(extract_feat):
-                #     for i in range(len(extract_feat)):
-                #         extract_feat[i].append(feat_val_extract)
                 self.children.append(TreeNode(extract_feat, extract_labels, np.unique(extract_labels).size))
             for node in self.children:
                 node.split()
@@ -149,12 +138,22 @@ class TreeNode(object):
         self.feature_uniq_split = next_feature[1]
         self.dim_split = next_feature[2]
 
-
     # TODO: predict the branch or the class
     def predict(self, feature):
         # feature: List[any]
         # return: int
-        raise NotImplementedError
+        if not self.splittable:
+            print(self.cls_max)
+            return self.cls_max
+        else:
+            if feature[self.dim_split] not in self.feature_uniq_split:
+                print(self.cls_max)
+                return self.cls_max
+            branch_index = self.feature_uniq_split.index(feature[self.dim_split])
+            child_node = self.children[branch_index]
+            temp_feature = feature[:]
+            temp_feature.pop(self.dim_split)
+            return child_node.predict(temp_feature)
 
 
 def attribute_split_count(labels):
@@ -163,8 +162,3 @@ def attribute_split_count(labels):
         labels_split.append(labels.count(label))
     return labels_split
 
-
-def is_list_empty(inList):
-    if isinstance(inList, list):  # Is a list
-        return all(map(is_list_empty, inList))
-    return False  # Not a list

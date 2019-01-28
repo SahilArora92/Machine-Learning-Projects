@@ -19,6 +19,13 @@ def test_tree():
     # print
     Utils.print_tree(dTree)
 
+    # data
+    X_test, y_test = data.sample_decision_tree_test()
+    # testing
+    y_est_test = dTree.predict(X_test)
+    test_accu = accuracy_score(y_est_test, y_test)
+    print('test_accu', test_accu)
+
 
 def test_big_tree():
     # load data
@@ -32,6 +39,11 @@ def test_big_tree():
 
     # print
     Utils.print_tree(dTree)
+
+    # testing
+    y_est_test = dTree.predict(X_test)
+    test_accu = accuracy_score(y_est_test, y_test)
+    print('test_accu', test_accu)
 
 scaling_classes = {
     'min_max_scale': MinMaxScaler,
@@ -132,4 +144,4 @@ if __name__ == "__main__":
     # print(obj(call1_feature))
     # print(obj(call2_feature))
     test_big_tree()
-    # test_tree()
+    #test_tree()
