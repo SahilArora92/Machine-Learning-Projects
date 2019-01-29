@@ -6,6 +6,7 @@ class DecisionTree():
     def __init__(self):
         self.clf_name = "DecisionTree"
         self.root_node = None
+        self.tree_accuracy = None
 
     def train(self, features, labels):
         # features: List[List[float]], labels: List[int]
@@ -143,11 +144,9 @@ class TreeNode(object):
         # feature: List[any]
         # return: int
         if not self.splittable:
-            print(self.cls_max)
             return self.cls_max
         else:
             if feature[self.dim_split] not in self.feature_uniq_split:
-                print(self.cls_max)
                 return self.cls_max
             branch_index = self.feature_uniq_split.index(feature[self.dim_split])
             child_node = self.children[branch_index]

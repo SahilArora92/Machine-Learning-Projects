@@ -21,9 +21,9 @@ def Information_Gain(S, branches):
 
     info_children = 0.0
     for sum_b, entropy_b in zip(entropy_branches, sum_branches):
-        info_children += (sum_b/total_sum_branches)*entropy_b
+        info_children += (sum_b / total_sum_branches) * entropy_b
 
-    return float(S-info_children)
+    return float(S - info_children)
 
 
 def calc_entropy(branch, sum_branch):
@@ -39,11 +39,64 @@ def calc_entropy(branch, sum_branch):
 
 
 # TODO: implement reduced error prunning function, pruning your tree on this function
+# After pruning a node, you need to set the most common label on training examples to this node.
 def reduced_error_prunning(decisionTree, X_test, y_test):
     # decisionTree
     # X_test: List[List[any]]
     # y_test: List
-    raise NotImplementedError
+
+    X_test = convert_nparray_to_list(X_test)
+    y_test = convert_nparray_to_list(y_test)
+
+    y_predict = decisionTree.predict(X_test)
+    tree_acc = calc_accuracy(y_test, y_predict)
+    if not decisionTree.root_node:
+        return []
+    decisionTree.tree_accuracy = tree_acc
+    tree_traverse(decisionTree.root_node, X_test, y_test, decisionTree)
+
+
+def convert_nparray_to_list(np_array):
+    if type(np_array) is np.ndarray:
+        np_array = np_array.tolist()
+    return np_array
+
+
+def tree_traverse(node, X_test, y_test, dtree):
+    if not node:
+        return
+
+    # post order traversal
+    for childNode in node.children:
+        tree_traverse(childNode, X_test, y_test, dtree)
+
+    copy_children = node.children
+    copy_splittable = node.splittable
+
+    if node.splittable:
+        # replace parent with majority class
+        node.children = []
+        node.splittable = False
+
+        y_predict = dtree.predict(X_test)
+        new_acc = calc_accuracy(y_test, y_predict)
+
+        if new_acc > dtree.tree_accuracy:
+            dtree.tree_accuracy = new_acc
+        else:
+            node.children = copy_children
+            node.splittable = copy_splittable
+    return
+
+
+def calc_accuracy(y_actual, y_pred):
+    match = 0
+    if len(y_actual) == 0:
+        return 0
+    for a, p in zip(y_actual, y_pred):
+        if a == p:
+            match += 1
+    return match / len(y_actual)
 
 
 # print current tree
@@ -230,7 +283,6 @@ def filter_ties(max_f1):
         return majority
     else:
         return max_f1
-
 
 
 class NormalizationScaler:

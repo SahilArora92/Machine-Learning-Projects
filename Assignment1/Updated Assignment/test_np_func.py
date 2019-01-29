@@ -26,6 +26,12 @@ def test_tree():
     test_accu = accuracy_score(y_est_test, y_test)
     print('test_accu', test_accu)
 
+    Utils.reduced_error_prunning(dTree, X_test, y_test)
+
+    y_est_test = dTree.predict(X_test)
+    test_accu = accuracy_score(y_est_test, y_test)
+    print('test_accu', test_accu)
+
 
 def test_big_tree():
     # load data
@@ -38,12 +44,21 @@ def test_big_tree():
     dTree.train(X_train.tolist(), y_train.tolist())
 
     # print
-    Utils.print_tree(dTree)
+    # Utils.print_tree(dTree)
 
     # testing
     y_est_test = dTree.predict(X_test)
     test_accu = accuracy_score(y_est_test, y_test)
     print('test_accu', test_accu)
+
+    Utils.reduced_error_prunning(dTree, X_test, y_test)
+
+    y_est_test = dTree.predict(X_test)
+    test_accu = accuracy_score(y_est_test, y_test)
+    print('test_accu', test_accu)
+
+    # print
+    Utils.print_tree(dTree)
 
 scaling_classes = {
     'min_max_scale': MinMaxScaler,
