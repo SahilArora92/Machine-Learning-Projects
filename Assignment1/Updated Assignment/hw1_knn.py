@@ -5,9 +5,11 @@ from typing import List
 import numpy as np
 import scipy
 
+
 ############################################################################
 # DO NOT MODIFY ABOVE CODES
 ############################################################################
+
 
 class KNN:
 
@@ -15,14 +17,14 @@ class KNN:
         self.k = k
         self.distance_function = distance_function
 
-    #TODO: save features and lable to self
+    # TODO: save features and lable to self
     def train(self, features: List[List[float]], labels: List[int]):
         # features: List[List[float]] a list of points
         # labels: List[int] labels of features
         self.feat = features
         self.labels = labels
 
-    #TODO: predict labels of a list of points
+    # TODO: predict labels of a list of points
     def predict(self, features: List[List[float]]) -> List[int]:
         # features: List[List[float]] a list of points
         # return: List[int] a list of predicted labels
@@ -49,17 +51,17 @@ class KNN:
                 max_count = hash_dict[i]
         return res
 
-
-    #TODO: find KNN of one point
+    # TODO: find KNN of one point
     def get_k_neighbors(self, point: List[float]) -> List[int]:
         # point: List[float] one example
         # return: List[int] labels of K nearest neighbor
         dis = []
         for curr_feat, curr_label in zip(self.feat, self.labels):
             dis.append((self.distance_function(curr_feat, point), curr_label))
-        sorted(dis)
+        dis.sort()
         k_near_neighbor = [x[1] for x in dis]
         return k_near_neighbor[:self.k]
+
 
 if __name__ == '__main__':
     print(np.__version__)
