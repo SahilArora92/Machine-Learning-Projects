@@ -9,6 +9,7 @@ tune_lambda, test_error and mapping_data.
 import numpy as np
 import pandas as pd
 
+
 ###### Q1.1 ######
 def mean_square_error(w, X, y):
     """
@@ -24,11 +25,13 @@ def mean_square_error(w, X, y):
     # TODO 1: Fill in your code here #
     #####################################################
     err = None
+
     return err
+
 
 ###### Q1.2 ######
 def linear_regression_noreg(X, y):
-  """
+    """
   Compute the weight parameter given X and y.
   Inputs:
   - X: A numpy array of shape (num_samples, D) containing feature.
@@ -36,11 +39,16 @@ def linear_regression_noreg(X, y):
   Returns:
   - w: a numpy array of shape (D, )
   """
-  #####################################################
-  #	TODO 2: Fill in your code here #
-  #####################################################		
-  w = None
-  return w
+    #####################################################
+    #	TODO 2: Fill in your code here #
+    #####################################################
+    w = None
+    X_t = np.transpose(X)
+    right_part = np.dot(X_t, y)
+    left_part = np.dot(X_t, X)
+    w = np.dot(np.linalg.inv(left_part), right_part)
+    return w
+
 
 ###### Q1.3 ######
 def linear_regression_invertible(X, y):
@@ -70,11 +78,12 @@ def regularized_linear_regression(X, y, lambd):
     Returns:
     - w: a numpy array of shape (D, )
     """
-  #####################################################
-  # TODO 4: Fill in your code here #
-  #####################################################		
+    #####################################################
+    # TODO 4: Fill in your code here #
+    #####################################################
     w = None
     return w
+
 
 ###### Q1.5 ######
 def tune_lambda(Xtrain, ytrain, Xval, yval):
@@ -93,7 +102,7 @@ def tune_lambda(Xtrain, ytrain, Xval, yval):
     #####################################################		
     bestlambda = None
     return bestlambda
-    
+
 
 ###### Q1.6 ######
 def mapping_data(X, power):
@@ -108,7 +117,5 @@ def mapping_data(X, power):
     #####################################################
     # TODO 6: Fill in your code here #
     #####################################################		
-    
+
     return X
-
-
