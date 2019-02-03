@@ -25,7 +25,10 @@ def mean_square_error(w, X, y):
     # TODO 1: Fill in your code here #
     #####################################################
     err = None
-
+    X = np.nan_to_num(X)
+    w = np.nan_to_num(w)
+    y = np.nan_to_num(y)
+    err = np.nanmean(np.square(np.dot(X, w) - y))
     return err
 
 
@@ -43,6 +46,8 @@ def linear_regression_noreg(X, y):
     #	TODO 2: Fill in your code here #
     #####################################################
     w = None
+    X = np.nan_to_num(X)
+    y = np.nan_to_num(y)
     X_t = np.transpose(X)
     right_part = np.dot(X_t, y)
     left_part = np.dot(X_t, X)
@@ -64,6 +69,19 @@ def linear_regression_invertible(X, y):
     # TODO 3: Fill in your code here #
     #####################################################
     w = None
+    X = np.nan_to_num(X)
+    y = np.nan_to_num(y)
+    I = np.identity(X.shape[1])
+    X_t = np.transpose(X)
+    right_part = np.dot(X_t, y)
+    left_part = np.dot(X_t, X)
+    e,v = np.linalg.eig(left_part)
+    temp_min = np.min(np.abs(e))
+    while temp_min < (10**-5):
+        left_part = left_part.__add__(0.1 * I)
+        e, v = np.linalg.eig(left_part)
+        temp_min = np.min(np.abs(e))
+    w = np.dot(np.linalg.inv(left_part), right_part)
     return w
 
 
@@ -82,6 +100,20 @@ def regularized_linear_regression(X, y, lambd):
     # TODO 4: Fill in your code here #
     #####################################################
     w = None
+    X = np.nan_to_num(X)
+    y = np.nan_to_num(y)
+    I = np.identity(X.shape[1])
+    X_t = np.transpose(X)
+    right_part = np.dot(X_t, y)
+    left_part = np.dot(X_t, X)
+    # e, v = np.linalg.eig(left_part)
+    # temp_min = np.min(np.abs(e))
+    # while temp_min < (10 ** -5):
+    #     left_part = left_part.__add__(lambd * I)
+    #     e, v = np.linalg.eig(left_part)
+    #     temp_min = np.min(np.abs(e))
+    left_part = left_part.__add__(lambd * I)
+    w = np.dot(np.linalg.inv(left_part), right_part)
     return w
 
 
@@ -101,6 +133,15 @@ def tune_lambda(Xtrain, ytrain, Xval, yval):
     # TODO 5: Fill in your code here #
     #####################################################		
     bestlambda = None
+    curr_lambda = 10**-19
+    min_error = 999999999
+    while curr_lambda <= 10**19:
+        weights = regularized_linear_regression(Xtrain, ytrain, curr_lambda)
+        curr_error = mean_square_error(weights, Xval, yval)
+        if min_error > curr_error:
+            min_error = curr_error
+            bestlambda = curr_lambda
+        curr_lambda *= 10
     return bestlambda
 
 
@@ -116,6 +157,14 @@ def mapping_data(X, power):
     """
     #####################################################
     # TODO 6: Fill in your code here #
-    #####################################################		
+    #####################################################
+    # test_X = np.asarray([[1,2,3],[0,0,5]])
+    # X = test_X
+    # power = 4
 
-    return X
+    if power == 1:
+        return X
+    X_mapped = X
+    for i in range(2, power+1):
+        X_mapped = np.concatenate((X_mapped, np.power(X, i)), axis=1)
+    return X_mapped
