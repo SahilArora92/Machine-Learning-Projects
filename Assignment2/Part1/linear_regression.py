@@ -133,16 +133,21 @@ def tune_lambda(Xtrain, ytrain, Xval, yval):
     # TODO 5: Fill in your code here #
     #####################################################		
     bestlambda = None
-    curr_lambda = 10**-19
-    min_error = 999999999
-    while curr_lambda <= 10**19:
-        weights = regularized_linear_regression(Xtrain, ytrain, curr_lambda)
+    min_error = float("inf")
+    for i in range(-19, 20):
+        weights = regularized_linear_regression(Xtrain, ytrain, 10 ** i)
         curr_error = mean_square_error(weights, Xval, yval)
         if min_error > curr_error:
             min_error = curr_error
-            bestlambda = curr_lambda
-        curr_lambda *= 10
+            bestlambda = 10 ** i
     return bestlambda
+
+    # max_val = (float("inf"), float("inf"))
+    # for i in range(-19, 20):
+    #     err = mean_square_error(regularized_linear_regression(Xtrain, ytrain, 10 ** i), Xval, yval)
+    #     if err < max_val[0]:
+    #         max_val = (err, 10 ** i)
+    # return max_val[1]
 
 
 ###### Q1.6 ######

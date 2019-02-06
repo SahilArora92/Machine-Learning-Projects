@@ -36,6 +36,36 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
         #          Compute w and b here            #
         w = np.zeros(D)
         b = 0
+
+        # w_t = np.transpose(w)
+        # check Sign
+        # mis_class = np.dot(y, (np.dot(X, w_t)+b).T)
+        # mis = [1 if x <= 0 else 0 for x in np.ndindex(mis_class.shape)]
+
+        if N == 0:
+            return w, b
+        else:
+
+            # SGD update
+            # for epoch in range(max_iterations):
+            #     for i, x in enumerate(X):
+            #         if ((np.dot(X[i].T, w) + b) * y[i]) <= 0:
+            #             w = w + step_size*X[i]*y[i]
+            #             b = b + step_size*y[i]
+            # return w, b
+
+            # GD update
+            y[y == 0] = -1
+            for epoch in range(max_iterations):
+                sum_xy = np.zeros(D)
+                sum_y = 0
+                for i, x in enumerate(X):
+                    if ((np.dot(X[i].T, w) + b) * y[i]) <= 0:
+                        sum_xy += X[i] * y[i]
+                        sum_y += y[i]
+                w += (step_size * (sum_xy / N))
+                b += (step_size * (sum_y / N))
+            return w, b
         ############################################
         
 
@@ -69,7 +99,7 @@ def sigmoid(z):
     #          Compute value                   #
     value = z
     ############################################
-    
+    value = 1 / (1 + np.exp(-value))
     return value
 
 def binary_predict(X, w, b, loss="perceptron"):
