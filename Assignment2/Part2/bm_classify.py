@@ -21,30 +21,29 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
     N, D = X.shape
     assert len(np.unique(y)) == 2
 
-
     w = np.zeros(D)
     if w0 is not None:
         w = w0
-    
+
     b = 0
     if b0 is not None:
         b = b0
+    y[y == 0] = -1
 
-    if loss == "perceptron":
-        ############################################
-        # TODO 1 : Edit this if part               #
-        #          Compute w and b here            #
-        w = np.zeros(D)
-        b = 0
+    if N == 0:
+        return w, b
+    else:
+        if loss == "perceptron":
+            ############################################
+            # TODO 1 : Edit this if part               #
+            #          Compute w and b here            #
+            w = np.zeros(D)
+            b = 0
 
-        # w_t = np.transpose(w)
-        # check Sign
-        # mis_class = np.dot(y, (np.dot(X, w_t)+b).T)
-        # mis = [1 if x <= 0 else 0 for x in np.ndindex(mis_class.shape)]
-
-        if N == 0:
-            return w, b
-        else:
+            # w_t = np.transpose(w)
+            # check Sign
+            # mis_class = np.dot(y, (np.dot(X, w_t)+b).T)
+            # mis = [1 if x <= 0 else 0 for x in np.ndindex(mis_class.shape)]
 
             # SGD update
             # for epoch in range(max_iterations):
@@ -55,7 +54,6 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
             # return w, b
 
             # GD update
-            y[y == 0] = -1
             for epoch in range(max_iterations):
                 sum_xy = np.zeros(D)
                 sum_y = 0
@@ -66,26 +64,37 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
                 w += (step_size * (sum_xy / N))
                 b += (step_size * (sum_y / N))
             return w, b
-        ############################################
-        
+            ############################################
 
-    elif loss == "logistic":
-        ############################################
-        # TODO 2 : Edit this if part               #
-        #          Compute w and b here            #
-        w = np.zeros(D)
-        b = 0
-        ############################################
-        
 
-    else:
-        raise "Loss Function is undefined."
+        elif loss == "logistic":
+            ############################################
+            # TODO 2 : Edit this if part               #
+            #          Compute w and b here            #
+            w = np.zeros(D)
+            b = 0
 
-    assert w.shape == (D,)
-    return w, b
+            for epoch in range(max_iterations):
+                sum_xy = np.zeros(D)
+                sum_y = 0
+                for i, x in enumerate(X):
+                    sigmoid_val = sigmoid(-((np.dot(X[i].T, w) + b) * y[i]))
+                    sum_xy += sigmoid_val * X[i] * y[i]
+                    sum_y += sigmoid_val * y[i]
+                w += (step_size * (sum_xy / N))
+                b += (step_size * (sum_y / N))
+            return w, b
+            ############################################
+
+
+        else:
+            raise "Loss Function is undefined."
+
+        assert w.shape == (D,)
+        return w, b
+
 
 def sigmoid(z):
-    
     """
     Inputs:
     - z: a numpy array or a float number
@@ -97,10 +106,10 @@ def sigmoid(z):
     ############################################
     # TODO 3 : Edit this part to               #
     #          Compute value                   #
-    value = z
     ############################################
-    value = 1 / (1 + np.exp(-value))
+    value = 1 / (1 + np.exp(-z))
     return value
+
 
 def binary_predict(X, w, b, loss="perceptron"):
     """
@@ -116,37 +125,38 @@ def binary_predict(X, w, b, loss="perceptron"):
     - preds: N dimensional vector of binary predictions: {0, 1}
     """
     N, D = X.shape
-    
+    temp_func = np.dot(X, w.T) + b
+    preds = np.zeros(N)
     if loss == "perceptron":
         ############################################
         # TODO 4 : Edit this if part               #
         #          Compute preds                   #
-        preds = np.zeros(N)
+        preds += temp_func
+        preds = np.where(preds > 0, 1, 0)
         ############################################
-        
+
 
     elif loss == "logistic":
         ############################################
         # TODO 5 : Edit this if part               #
         #          Compute preds                   #
-        preds = np.zeros(N)
+        preds += sigmoid(temp_func)
+        preds = np.where(preds > 0.5, 1, 0)
         ############################################
-        
+
 
     else:
         raise "Loss Function is undefined."
-    
 
-    assert preds.shape == (N,) 
+    assert preds.shape == (N,)
     return preds
 
 
-
 def multiclass_train(X, y, C,
-                     w0=None, 
+                     w0=None,
                      b0=None,
                      gd_type="sgd",
-                     step_size=0.5, 
+                     step_size=0.5,
                      max_iterations=1000):
     """
     Inputs:
@@ -171,7 +181,7 @@ def multiclass_train(X, y, C,
     w = np.zeros((C, D))
     if w0 is not None:
         w = w0
-    
+
     b = np.zeros(C)
     if b0 is not None:
         b = b0
@@ -184,7 +194,7 @@ def multiclass_train(X, y, C,
         w = np.zeros((C, D))
         b = np.zeros(C)
         ############################################
-        
+
 
     elif gd_type == "gd":
         ############################################
@@ -193,11 +203,10 @@ def multiclass_train(X, y, C,
         w = np.zeros((C, D))
         b = np.zeros(C)
         ############################################
-        
+
 
     else:
         raise "Type of Gradient Descent is undefined."
-    
 
     assert w.shape == (C, D)
     assert b.shape == (C,)
@@ -227,8 +236,3 @@ def multiclass_predict(X, w, b):
 
     assert preds.shape == (N,)
     return preds
-
-
-
-
-        
