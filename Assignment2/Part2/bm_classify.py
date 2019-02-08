@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_iterations=1000):
+def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_iterations=1):
     """
     Inputs:
     - X: training features, a N-by-D numpy array, where N is the 
@@ -187,12 +187,35 @@ def multiclass_train(X, y, C,
         b = b0
 
     np.random.seed(42)
+    w = np.c_[w, b]
+    X = np.c_[X, np.ones(N)]
+    classes = np.unique(y)
+    classes.sort()
     if gd_type == "sgd":
         ############################################
         # TODO 6 : Edit this if part               #
         #          Compute w and b                 #
-        w = np.zeros((C, D))
-        b = np.zeros(C)
+        # SGD update
+        for epoch in range(max_iterations):
+            rand_index = np.random.choice(N)
+            y_n=y[rand_index]
+            softmax_arr=[]
+
+            softmax_denom = np.asarray([np.dot(w_item.T, X[rand_index]) for w_item in w])
+            softmax_denom -= np.max(softmax_denom)
+
+            for clas in classes:
+                softmax_numerator = np.dot(w[clas].T, X[rand_index])
+                softmax_numerator -= np.max(softmax_numerator)
+
+                softmax_arr.append(soft_max(softmax_numerator, softmax_denom))
+
+            softmax_arr[y_n] -= 1
+            prob_array = np.asarray(softmax_arr)
+
+            w -= step_size * np.dot(prob_array, X[rand_index].T)
+        w_T = w.T
+        return w_T[:-1].T, w_T[-1]
         ############################################
 
 
@@ -200,8 +223,7 @@ def multiclass_train(X, y, C,
         ############################################
         # TODO 7 : Edit this if part               #
         #          Compute w and b                 #
-        w = np.zeros((C, D))
-        b = np.zeros(C)
+        return w, b
         ############################################
 
 
@@ -212,6 +234,12 @@ def multiclass_train(X, y, C,
     assert b.shape == (C,)
 
     return w, b
+
+
+def soft_max(numerator, deno):
+    e_z_num = np.exp(numerator)
+    e_z_deno = np.exp(deno)
+    return e_z_num / e_z_deno.sum()
 
 
 def multiclass_predict(X, w, b):
