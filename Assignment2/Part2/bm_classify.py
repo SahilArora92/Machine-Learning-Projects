@@ -55,9 +55,9 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
 
             # GD update
             for epoch in range(max_iterations):
-                y_estimated = np.dot(X, w.T)
-                mult_val = np.multiply(y, y_estimated)
-                indexes = mult_val <= 0
+                # y_estimated = np.dot(X, w.T)
+                # mult_val = np.multiply(y, np.dot(X, w.T))
+                indexes = np.multiply(y, np.dot(X, w.T)) <= 0
                 x_ind = X[indexes]
                 y_ind = y[indexes]
                 w += step_size * (np.dot(y_ind.T, x_ind) / N)
@@ -71,8 +71,7 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
             #          Compute w and b here            #
             # w = np.tile(w, (N,1))
             for epoch in range(max_iterations):
-                z = w*X[:, np.newaxis]
-                z = np.sum(z, axis=1)
+                z = np.multiply(w, X)
                 z = np.sum(z, axis=1)
                 h = sigmoid(-(y.T * z).T)
                 temp = (X.T * (h.T * y).T).T
@@ -174,22 +173,19 @@ def multiclass_train(X, y, C,
     np.random.seed(42)
     w = np.c_[w, b]
     X = np.c_[X, np.ones(N)]
-    # classes = np.unique(y)
-    # classes.sort()
     if gd_type == "sgd":
         ############################################
         # TODO 6 : Edit this if part               #
         #          Compute w and b                 #
         # SGD update
-        # y_enc = (np.arange(np.max(y) + 1) == y[:, None]).astype(float)
         for epoch in range(max_iterations):
             rand_index = np.random.choice(N)
             y_n = y[rand_index]
-            input_mat = np.multiply(w, X[rand_index])
-            input_temp = np.sum(input_mat, axis=1)
-            soft_m = soft_max(input_temp-np.max(input_temp))
+            x_rand = X[rand_index]
+            input_mat = np.matmul(w, x_rand.T)
+            soft_m = soft_max(input_mat - np.max(input_mat))
             soft_m[y_n] -= 1
-            w -= step_size * np.multiply(np.tile(X[rand_index], (C, 1)), soft_m[:, np.newaxis])
+            w -= step_size * np.multiply(np.tile(x_rand, (C, 1)), soft_m[:, np.newaxis])
         return w.T[:-1].T, w.T[-1]
         ############################################
 
@@ -198,7 +194,14 @@ def multiclass_train(X, y, C,
         ############################################
         # TODO 7 : Edit this if part               #
         #          Compute w and b                 #
-        return w, b
+        for epoch in range(max_iterations):
+            input_mat = np.matmul(w, X.T)
+            input_mat -= np.max(input_mat)
+            input_mat = soft_max(input_mat)
+            for i in range(N):
+                input_mat[y[i]][i] -= 1
+            w -= step_size*(np.matmul(input_mat, X)/N)
+        return w.T[:-1].T, w.T[-1]
         ############################################
 
 
@@ -207,7 +210,7 @@ def multiclass_train(X, y, C,
 
 
 def soft_max(z):
-    return (np.exp(z.T) / np.sum(np.exp(z), axis=0)).T
+    return np.exp(z) / np.sum(np.exp(z), axis=0)
 
 
 def multiclass_predict(X, w, b):
