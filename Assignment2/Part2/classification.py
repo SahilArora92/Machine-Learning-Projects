@@ -70,7 +70,8 @@ if __name__ == '__main__':
         sys.stdout = open(args.output, 'w')
 
     if not args.type or args.type == 'binary':
-        run_binary()
+        # run_binary()
+        pass
 
     if not args.type or args.type == 'multiclass':
         run_multiclass()
