@@ -55,8 +55,6 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
 
             # GD update
             for epoch in range(max_iterations):
-                # y_estimated = np.dot(X, w.T)
-                # mult_val = np.multiply(y, np.dot(X, w.T))
                 indexes = np.multiply(y, np.dot(X, w.T)) <= 0
                 x_ind = X[indexes]
                 y_ind = y[indexes]
@@ -198,8 +196,10 @@ def multiclass_train(X, y, C,
             input_mat = np.matmul(w, X.T)
             input_mat -= np.max(input_mat)
             input_mat = soft_max(input_mat)
+            # temp_mat = (np.zeros(input_mat.shape)+y).astype(int)
             for i in range(N):
                 input_mat[y[i]][i] -= 1
+            # np.where(input_mat == y[i], input_mat-1, input_mat)
             w -= step_size*(np.matmul(input_mat, X)/N)
         return w.T[:-1].T, w.T[-1]
         ############################################
