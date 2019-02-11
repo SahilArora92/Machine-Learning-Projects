@@ -1,0 +1,18 @@
+Clear smile data: 3 class classification
+sgd training time: 0.172825 seconds
+train acc: 0.998358, test acc: 0.996169
+gd training time: 0.646064 seconds
+train acc: 1.000000, test acc: 1.000000
+
+Blur smile data: 3 class classification
+sgd training time: 0.063967 seconds
+train acc: 0.937371, test acc: 0.934867
+gd training time: 27.967990 seconds
+train acc: 0.975743, test acc: 0.974867
+
+MNIST: 10 class classification
+sgd training time: 0.111530 seconds
+train acc: 0.765000, test acc: 0.746000
+gd training time: 11.313005 seconds
+train acc: 0.945400, test acc: 0.896000
+

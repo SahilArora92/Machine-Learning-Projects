@@ -21,41 +21,69 @@ def binary_train(X, y, loss="perceptron", w0=None, b0=None, step_size=0.5, max_i
     N, D = X.shape
     assert len(np.unique(y)) == 2
 
-
     w = np.zeros(D)
     if w0 is not None:
         w = w0
-    
+
     b = 0
     if b0 is not None:
         b = b0
 
-    if loss == "perceptron":
-        ############################################
-        # TODO 1 : Edit this if part               #
-        #          Compute w and b here            #
-        w = np.zeros(D)
-        b = 0
-        ############################################
-        
-
-    elif loss == "logistic":
-        ############################################
-        # TODO 2 : Edit this if part               #
-        #          Compute w and b here            #
-        w = np.zeros(D)
-        b = 0
-        ############################################
-        
-
+    y = np.where(y == 0, -1, 1)
+    w = np.append(w, b)
+    X = np.c_[X, np.ones(N)]
+    if N == 0:
+        return w, b
     else:
-        raise "Loss Function is undefined."
+        if loss == "perceptron":
+            ############################################
+            # TODO 1 : Edit this if part               #
+            #          Compute w and b here            #
 
-    assert w.shape == (D,)
-    return w, b
+            # w_t = np.transpose(w)
+            # check Sign
+            # mis_class = np.dot(y, (np.dot(X, w_t)+b).T)
+            # mis = [1 if x <= 0 else 0 for x in np.ndindex(mis_class.shape)]
+
+            # SGD update
+            # for epoch in range(max_iterations):
+            #     for i, x in enumerate(X):
+            #         if ((np.dot(X[i].T, w) + b) * y[i]) <= 0:
+            #             w = w + step_size*X[i]*y[i]
+            #             b = b + step_size*y[i]
+            # return w, b
+
+            # GD update
+            for epoch in range(max_iterations):
+                indexes = np.multiply(y, np.dot(X, w.T)) <= 0
+                x_ind = X[indexes]
+                y_ind = y[indexes]
+                w += step_size * (np.dot(y_ind.T, x_ind) / N)
+            return w[:-1], w[-1]
+            ############################################
+
+
+        elif loss == "logistic":
+            ############################################
+            # TODO 2 : Edit this if part               #
+            #          Compute w and b here            #
+            # w = np.tile(w, (N,1))
+            for epoch in range(max_iterations):
+                z = np.multiply(w, X)
+                z = np.sum(z, axis=1)
+                h = sigmoid(-(y.T * z).T)
+                temp = (X.T * (h.T * y).T).T
+                w += (step_size * (temp.sum(axis=0) / N))
+
+            return w[:-1], w[-1]
+            ############################################
+
+
+        else:
+            raise "Loss Function is undefined."
+
 
 def sigmoid(z):
-    
     """
     Inputs:
     - z: a numpy array or a float number
@@ -67,10 +95,9 @@ def sigmoid(z):
     ############################################
     # TODO 3 : Edit this part to               #
     #          Compute value                   #
-    value = z
     ############################################
-    
-    return value
+    return 1 / (1 + np.exp(-z))
+
 
 def binary_predict(X, w, b, loss="perceptron"):
     """
@@ -85,38 +112,33 @@ def binary_predict(X, w, b, loss="perceptron"):
     Returns:
     - preds: N dimensional vector of binary predictions: {0, 1}
     """
-    N, D = X.shape
-    
+
     if loss == "perceptron":
         ############################################
         # TODO 4 : Edit this if part               #
         #          Compute preds                   #
-        preds = np.zeros(N)
+        # preds = np.dot(X, w.T) + b
+        return np.where((np.dot(X, w.T) + b) > 0, 1, 0)
         ############################################
-        
+
 
     elif loss == "logistic":
         ############################################
         # TODO 5 : Edit this if part               #
         #          Compute preds                   #
-        preds = np.zeros(N)
+        # preds = sigmoid(np.dot(X, w.T) + b)
+        return np.where((sigmoid(np.dot(X, w.T) + b)) > 0.5, 1, 0)
         ############################################
-        
 
     else:
         raise "Loss Function is undefined."
-    
-
-    assert preds.shape == (N,) 
-    return preds
-
 
 
 def multiclass_train(X, y, C,
-                     w0=None, 
+                     w0=None,
                      b0=None,
                      gd_type="sgd",
-                     step_size=0.5, 
+                     step_size=0.5,
                      max_iterations=1000):
     """
     Inputs:
@@ -141,38 +163,54 @@ def multiclass_train(X, y, C,
     w = np.zeros((C, D))
     if w0 is not None:
         w = w0
-    
+
     b = np.zeros(C)
     if b0 is not None:
         b = b0
 
     np.random.seed(42)
+    w = np.c_[w, b]
+    X = np.c_[X, np.ones(N)]
     if gd_type == "sgd":
         ############################################
         # TODO 6 : Edit this if part               #
         #          Compute w and b                 #
-        w = np.zeros((C, D))
-        b = np.zeros(C)
+        # SGD update
+        for epoch in range(max_iterations):
+            rand_index = np.random.choice(N)
+            y_n = y[rand_index]
+            x_rand = X[rand_index]
+            input_mat = np.matmul(w, x_rand.T)
+            soft_m = soft_max(input_mat - np.max(input_mat))
+            soft_m[y_n] -= 1
+            w -= step_size * np.multiply(np.tile(x_rand, (C, 1)), soft_m[:, np.newaxis])
+        return w.T[:-1].T, w.T[-1]
         ############################################
-        
+
 
     elif gd_type == "gd":
         ############################################
         # TODO 7 : Edit this if part               #
         #          Compute w and b                 #
-        w = np.zeros((C, D))
-        b = np.zeros(C)
+        for epoch in range(max_iterations):
+            input_mat = np.matmul(w, X.T)
+            input_mat -= np.max(input_mat)
+            input_mat = soft_max(input_mat)
+            # temp_mat = (np.zeros(input_mat.shape)+y).astype(int)
+            for i in range(N):
+                input_mat[y[i]][i] -= 1
+            # np.where(input_mat == y[i], input_mat-1, input_mat)
+            w -= step_size*(np.matmul(input_mat, X)/N)
+        return w.T[:-1].T, w.T[-1]
         ############################################
-        
+
 
     else:
         raise "Type of Gradient Descent is undefined."
-    
 
-    assert w.shape == (C, D)
-    assert b.shape == (C,)
 
-    return w, b
+def soft_max(z):
+    return np.exp(z) / np.sum(np.exp(z), axis=0)
 
 
 def multiclass_predict(X, w, b):
@@ -188,17 +226,8 @@ def multiclass_predict(X, w, b):
     Outputted predictions should be from {0, C - 1}, where
     C is the number of classes
     """
-    N, D = X.shape
     ############################################
     # TODO 8 : Edit this part to               #
     #          Compute preds                   #
-    preds = np.zeros(N)
+    return np.argmax(np.dot(X, w.T) + b, axis=1)
     ############################################
-
-    assert preds.shape == (N,)
-    return preds
-
-
-
-
-        
