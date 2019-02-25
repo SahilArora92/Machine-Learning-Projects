@@ -13,12 +13,11 @@ import json
 
 ### Modules ###
 
-    ########################################################################################
-    #   The following three modules (class) are what you need to complete  (check TODO)    #
-    ########################################################################################
+########################################################################################
+#   The following three modules (class) are what you need to complete  (check TODO)    #
+########################################################################################
 
 class linear_layer:
-
     """
         The linear (affine/fully-connected) module.
 
@@ -36,15 +35,14 @@ class linear_layer:
     """
 
     def __init__(self, input_D, output_D):
-
         self.params = dict()
 
         ###############################################################################################
         # TODO: Use np.random.normal() with mean as 0 and standard deviation as 0.1
         # W Shape (input_D, output_D), b shape (1, output_D)
         ###############################################################################################
-        raise NotImplementedError("Not Implemented function: __init__, class: linear_layer")
-
+        self.params['W'] = np.random.normal(0, 0.1, (input_D, output_D))
+        self.params['b'] = np.random.normal(0, 0.1, (1, output_D))
 
         self.gradient = dict()
 
@@ -52,10 +50,11 @@ class linear_layer:
         # TODO: Initialize gradients with zeros
         # Note: Shape of gradient is same as the respective variables
         ###############################################################################################
-        raise NotImplementedError("Not Implemented function: __init__, class: linear_layer")
+        self.gradient['W'] = np.zeros((input_D, output_D), dtype=float)
+        self.gradient['b'] = np.zeros((1, output_D), dtype=float)
+
 
     def forward(self, X):
-
         """
             The forward pass of the linear (affine/fully-connected) module.
 
@@ -70,11 +69,13 @@ class linear_layer:
         ################################################################################
         # TODO: Implement the linear forward pass. Store the result in forward_output  #
         ################################################################################
-        raise NotImplementedError("Not Implemented function: forward, class: linear_layer")
+        X_shape = np.shape(X)
+        # np.dstack([self.params['W']] * X_shape[0])
+        forward_output = (np.dot(X, np.dstack([self.params['W'].T] * X_shape[0]))) + \
+                         np.dstack([self.params['b']] * X_shape[0])
         return forward_output
 
     def backward(self, X, grad):
-
         """
             The backward pass of the linear (affine/fully-connected) module.
 
@@ -97,7 +98,9 @@ class linear_layer:
         # backward_output = ? (N-by-input_D numpy array, the gradient of the mini-batch loss w.r.t. X)
         # only return backward_output, but need to compute self.gradient['W'] and self.gradient['b']
         #################################################################################################
-        raise NotImplementedError("Not Implemented function: backward, class: linear_layer")
+        self.gradient['W'] = np.dot(grad, X.T)
+        self.gradient['b'] = grad
+        backward_output = np.dot(self.gradient['W'], grad)
         return backward_output
 
 
@@ -105,7 +108,6 @@ class linear_layer:
 
 
 class relu:
-
     """
         The relu (rectified linear unit) module.
 
@@ -118,7 +120,6 @@ class relu:
         self.mask = None
 
     def forward(self, X):
-
         """
             The forward pass of the relu (rectified linear unit) module.
 
@@ -136,7 +137,6 @@ class relu:
         return forward_output
 
     def backward(self, X, grad):
-
         """
             The backward pass of the relu (rectified linear unit) module.
 
@@ -162,7 +162,6 @@ class relu:
 class tanh:
 
     def forward(self, X):
-
         """
             Input:
             - X: A numpy array of arbitrary shape.
@@ -179,7 +178,6 @@ class tanh:
         return forward_output
 
     def backward(self, X, grad):
-
         """
             Input:
             - X: A numpy array of arbitrary shape, the input to the forward pass.
@@ -200,7 +198,6 @@ class tanh:
 # 4. Dropout
 
 class dropout:
-
     """
         It is built up with one arguments:
         - r: the dropout rate
@@ -259,12 +256,10 @@ class dropout:
         return backward_output
 
 
-
 # 5. Mini-batch Gradient Descent Optimization
 
 
 def miniBatchGradientDescent(model, momentum, _lambda, _alpha, _learning_rate):
-
     '''
         Input:
             model: Dictionary containing all parameters of the model
@@ -278,7 +273,6 @@ def miniBatchGradientDescent(model, momentum, _lambda, _alpha, _learning_rate):
         Returns: Updated model
     '''
 
-
     for module_name, module in model.items():
 
         # check if a module has learnable parameters
@@ -289,33 +283,28 @@ def miniBatchGradientDescent(model, momentum, _lambda, _alpha, _learning_rate):
                 if _alpha > 0.0:
 
                     #################################################################################
-                    # TODO: Update momentun using the formula:
+                    # TODO: Update momentum using the formula:
                     # m = alpha * m - learning_rate * g (Check add_momentum() function in utils file)
                     # And update model parameter
                     #################################################################################
-
-                    raise NotImplementedError("Not Implemented function: miniBatchGradientDescent")
-                    
-
+                    m = _alpha * momentum - (_learning_rate * g)
+                    module.params['W'] += m
                 else:
 
                     #################################################################################
                     # TODO: update model parameter without momentum
                     #################################################################################
-
-                    raise NotImplementedError("Not Implemented function: miniBatchGradientDescent")
+                    module.params['W'] -= _learning_rate * g
 
     return model
 
 
-
 def main(main_params, optimization_type="minibatch_sgd"):
-
     ### set the random seed ###
     np.random.seed(int(main_params['random_seed']))
 
     ### data processing ###
-    Xtrain, Ytrain, Xval, Yval , _, _ = data_loader_mnist(dataset = main_params['input_file'])
+    Xtrain, Ytrain, Xval, Yval, _, _ = data_loader_mnist(dataset=main_params['input_file'])
     N_train, d = Xtrain.shape
     N_val, _ = Xval.shape
 
@@ -349,17 +338,16 @@ def main(main_params, optimization_type="minibatch_sgd"):
     _dropout_rate = float(main_params['dropout_rate'])
     _activation = main_params['activation']
 
-
     if _activation == 'relu':
         act = relu
     else:
         act = tanh
 
     # create objects (modules) from the module classes
-    model['L1'] = linear_layer(input_D = d, output_D = num_L1)
+    model['L1'] = linear_layer(input_D=d, output_D=num_L1)
     model['nonlinear1'] = act()
-    model['drop1'] = dropout(r = _dropout_rate)
-    model['L2'] = linear_layer(input_D = num_L1, output_D = num_L2)
+    model['drop1'] = dropout(r=_dropout_rate)
+    model['L2'] = linear_layer(input_D=num_L1, output_D=num_L2)
     model['loss'] = softmax_cross_entropy()
 
     # Momentum
@@ -391,17 +379,15 @@ def main(main_params, optimization_type="minibatch_sgd"):
         val_loss = 0.0
 
         for i in range(int(np.floor(N_train / minibatch_size))):
-
             # get a mini-batch of data
-            x, y = trainSet.get_example(idx_order[i * minibatch_size : (i + 1) * minibatch_size])
+            x, y = trainSet.get_example(idx_order[i * minibatch_size: (i + 1) * minibatch_size])
 
             ### forward ###
             a1 = model['L1'].forward(x)
             h1 = model['nonlinear1'].forward(a1)
-            d1 = model['drop1'].forward(h1, is_train = True)
+            d1 = model['drop1'].forward(h1, is_train=True)
             a2 = model['L2'].forward(d1)
             loss = model['loss'].forward(a2, y)
-
 
             ### backward ###
             grad_a2 = model['loss'].backward(a2, y)
@@ -410,8 +396,8 @@ def main(main_params, optimization_type="minibatch_sgd"):
             # We have given the first and last backward calls
             # Do not modify them.
             ######################################################################################
-            
-            raise NotImplementedError("Not Implemented BACKWARD PASS in main()")
+
+            # raise NotImplementedError("Not Implemented BACKWARD PASS in main()")
 
             ######################################################################################
             # NOTE: DO NOT MODIFY CODE BELOW THIS, until next TODO
@@ -420,10 +406,9 @@ def main(main_params, optimization_type="minibatch_sgd"):
 
             ### gradient_update ###
             model = miniBatchGradientDescent(model, momentum, _lambda, _alpha, _learning_rate)
-            
+
         ### Computing training accuracy and obj ###
         for i in range(int(np.floor(N_train / minibatch_size))):
-
             x, y = trainSet.get_example(np.arange(i * minibatch_size, (i + 1) * minibatch_size))
 
             ### forward ###
@@ -432,7 +417,7 @@ def main(main_params, optimization_type="minibatch_sgd"):
             # Check above forward code
             # Make sure to keep train as False
             ######################################################################################
-            
+
             raise NotImplementedError("Not Implemented COMPUTING TRAINING ACCURACY in main()")
 
             ######################################################################################
@@ -454,7 +439,6 @@ def main(main_params, optimization_type="minibatch_sgd"):
 
         ### Computing validation accuracy ###
         for i in range(int(np.floor(N_val / minibatch_size))):
-
             x, y = valSet.get_example(np.arange(i * minibatch_size, (i + 1) * minibatch_size))
 
             ### forward ###
@@ -463,10 +447,9 @@ def main(main_params, optimization_type="minibatch_sgd"):
             # Check above forward code
             # Make sure to keep train as False
             ######################################################################################
-            
+
             raise NotImplementedError("Not Implemented COMPUTING VALIDATION ACCURACY in main()")
 
-            
             ######################################################################################
             # NOTE: DO NOT MODIFY CODE BELOW THIS, until next TODO
             ######################################################################################
@@ -495,10 +478,7 @@ def main(main_params, optimization_type="minibatch_sgd"):
     return train_loss_record, val_loss_record
 
 
-
 if __name__ == "__main__":
-
-
     ######################################################################################
     # Do not change this part of the code.
     # These are the default arguments used to run your code.
