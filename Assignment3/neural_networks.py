@@ -53,7 +53,6 @@ class linear_layer:
         self.gradient['W'] = np.zeros((input_D, output_D), dtype=float)
         self.gradient['b'] = np.zeros((1, output_D), dtype=float)
 
-
     def forward(self, X):
         """
             The forward pass of the linear (affine/fully-connected) module.
@@ -70,10 +69,13 @@ class linear_layer:
         # TODO: Implement the linear forward pass. Store the result in forward_output  #
         ################################################################################
         X_shape = np.shape(X)
-        # np.dstack([self.params['W']] * X_shape[0])
-        forward_output = (np.dot(X, np.dstack([self.params['W'].T] * X_shape[0]))) + \
-                         np.dstack([self.params['b']] * X_shape[0])
-        return forward_output
+        forward_output = np.matmul(np.dstack([self.params['W']] * X_shape[0]).T, X.T)[0] \
+                         + np.dstack([self.params['b']] * X_shape[0])[0]
+        # forward_output = []
+        # for x in X:
+        #     forward_output.append(np.dot(self.params['W'].T, x) + self.params['b'])
+        # t = np.asarray(forward_output)
+        return forward_output.T
 
     def backward(self, X, grad):
         """
@@ -98,9 +100,9 @@ class linear_layer:
         # backward_output = ? (N-by-input_D numpy array, the gradient of the mini-batch loss w.r.t. X)
         # only return backward_output, but need to compute self.gradient['W'] and self.gradient['b']
         #################################################################################################
-        self.gradient['W'] = np.dot(grad, X.T)
-        self.gradient['b'] = grad
-        backward_output = np.dot(self.gradient['W'], grad)
+        backward_output = np.matmul(grad, self.params['W'].T)
+        self.gradient['W'] = np.matmul(X.T, grad)
+        self.gradient['b'] = np.sum(grad, axis=0)
         return backward_output
 
 
@@ -133,8 +135,7 @@ class relu:
         ################################################################################
         # TODO: Implement the relu forward pass. Store the result in forward_output    #
         ################################################################################
-        raise NotImplementedError("Not Implemented function: forward, class: relu")
-        return forward_output
+        return np.where(X <= 0, 0, X)
 
     def backward(self, X, grad):
         """
@@ -153,7 +154,7 @@ class relu:
         # TODO: Implement the backward pass
         # You can use the mask created in the forward step.
         ####################################################################################################
-        raise NotImplementedError("Not Implemented function: backward, class: relu")
+        backward_output = np.multiply(grad, np.where(X <= 0, 0, 1))
         return backward_output
 
 
@@ -174,7 +175,7 @@ class tanh:
         # TODO: Implement the tanh forward pass. Store the result in forward_output
         # You can use np.tanh()
         ################################################################################
-        raise NotImplementedError("Not Implemented function: forward, class: tanh")
+        forward_output = np.tanh(X)
         return forward_output
 
     def backward(self, X, grad):
@@ -191,7 +192,7 @@ class tanh:
         # TODO: Implement the backward pass
         # Derivative of tanh is (1 - tanh^2)
         ####################################################################################################
-        raise NotImplementedError("Not Implemented function: backward, class: tanh")
+        backward_output = np.multiply(grad, 1-(np.tanh(X)**2))
         return backward_output
 
 
@@ -251,8 +252,7 @@ class dropout:
         # TODO: Implement the backward pass
         # You can use the mask created in the forward step
         ####################################################################################################
-
-        raise NotImplementedError("Not Implemented function: backward, class: dropout")
+        backward_output = np.multiply(grad, self.mask)
         return backward_output
 
 
@@ -287,14 +287,14 @@ def miniBatchGradientDescent(model, momentum, _lambda, _alpha, _learning_rate):
                     # m = alpha * m - learning_rate * g (Check add_momentum() function in utils file)
                     # And update model parameter
                     #################################################################################
-                    m = _alpha * momentum - (_learning_rate * g)
+                    m = (_alpha * momentum) - (_learning_rate * g)
                     module.params['W'] += m
                 else:
 
                     #################################################################################
                     # TODO: update model parameter without momentum
                     #################################################################################
-                    module.params['W'] -= _learning_rate * g
+                    module.params['W'] -= (_learning_rate * g)
 
     return model
 
@@ -396,9 +396,9 @@ def main(main_params, optimization_type="minibatch_sgd"):
             # We have given the first and last backward calls
             # Do not modify them.
             ######################################################################################
-
-            # raise NotImplementedError("Not Implemented BACKWARD PASS in main()")
-
+            grad_d1 = model['L2'].backward(d1, grad_a2)
+            grad_h1 = model['drop1'].backward(h1, grad_d1)
+            grad_a1 = model['nonlinear1'].backward(a1, grad_h1)
             ######################################################################################
             # NOTE: DO NOT MODIFY CODE BELOW THIS, until next TODO
             ######################################################################################
