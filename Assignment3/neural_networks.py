@@ -279,7 +279,7 @@ def miniBatchGradientDescent(model, momentum, _lambda, _alpha, _learning_rate):
                     # m = alpha * m - learning_rate * g (Check add_momentum() function in utils file)
                     # And update model parameter
                     #################################################################################
-                    m = (_alpha * momentum) - (_learning_rate * g)
+                    m = (_alpha * momentum[module_name + '_' + key]) - (_learning_rate * g)
                     module.params['W'] += m
                 else:
 
