@@ -71,10 +71,6 @@ class linear_layer:
         X_shape = np.shape(X)
         forward_output = np.matmul(np.dstack([self.params['W']] * X_shape[0]).T, X.T)[0] \
                          + np.dstack([self.params['b']] * X_shape[0])[0]
-        # forward_output = []
-        # for x in X:
-        #     forward_output.append(np.dot(self.params['W'].T, x) + self.params['b'])
-        # t = np.asarray(forward_output)
         return forward_output.T
 
     def backward(self, X, grad):
@@ -154,8 +150,7 @@ class relu:
         # TODO: Implement the backward pass
         # You can use the mask created in the forward step.
         ####################################################################################################
-        backward_output = np.multiply(grad, np.where(X <= 0, 0, 1))
-        return backward_output
+        return np.multiply(grad, np.where(X <= 0, 0, 1))
 
 
 # 3. tanh Activation
@@ -175,8 +170,7 @@ class tanh:
         # TODO: Implement the tanh forward pass. Store the result in forward_output
         # You can use np.tanh()
         ################################################################################
-        forward_output = np.tanh(X)
-        return forward_output
+        return np.tanh(X)
 
     def backward(self, X, grad):
         """
@@ -192,8 +186,7 @@ class tanh:
         # TODO: Implement the backward pass
         # Derivative of tanh is (1 - tanh^2)
         ####################################################################################################
-        backward_output = np.multiply(grad, 1-(np.tanh(X)**2))
-        return backward_output
+        return np.multiply(grad, 1-(np.tanh(X)**2))
 
 
 # 4. Dropout
@@ -252,8 +245,7 @@ class dropout:
         # TODO: Implement the backward pass
         # You can use the mask created in the forward step
         ####################################################################################################
-        backward_output = np.multiply(grad, self.mask)
-        return backward_output
+        return np.multiply(grad, self.mask)
 
 
 # 5. Mini-batch Gradient Descent Optimization
@@ -418,7 +410,10 @@ def main(main_params, optimization_type="minibatch_sgd"):
             # Make sure to keep train as False
             ######################################################################################
 
-            raise NotImplementedError("Not Implemented COMPUTING TRAINING ACCURACY in main()")
+            a1 = model['L1'].forward(x)
+            h1 = model['nonlinear1'].forward(a1)
+            d1 = model['drop1'].forward(h1, is_train=False)
+            a2 = model['L2'].forward(d1)
 
             ######################################################################################
             # NOTE: DO NOT MODIFY CODE BELOW THIS, until next TODO
@@ -448,7 +443,10 @@ def main(main_params, optimization_type="minibatch_sgd"):
             # Make sure to keep train as False
             ######################################################################################
 
-            raise NotImplementedError("Not Implemented COMPUTING VALIDATION ACCURACY in main()")
+            a1 = model['L1'].forward(x)
+            h1 = model['nonlinear1'].forward(a1)
+            d1 = model['drop1'].forward(h1, is_train=False)
+            a2 = model['L2'].forward(d1)
 
             ######################################################################################
             # NOTE: DO NOT MODIFY CODE BELOW THIS, until next TODO
