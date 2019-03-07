@@ -42,7 +42,7 @@ class linear_layer:
         # W Shape (input_D, output_D), b shape (1, output_D)
         ###############################################################################################
         self.params['W'] = np.random.normal(0, 0.1, (input_D, output_D))
-        self.params['b'] = np.random.normal(0, 0.1, (1, output_D))
+        self.params['b'] = np.random.normal(0, 0.1, output_D)
 
         self.gradient = dict()
 
@@ -51,7 +51,7 @@ class linear_layer:
         # Note: Shape of gradient is same as the respective variables
         ###############################################################################################
         self.gradient['W'] = np.zeros((input_D, output_D), dtype=float)
-        self.gradient['b'] = np.zeros((1, output_D), dtype=float)
+        self.gradient['b'] = np.zeros(output_D, dtype=float)
 
     def forward(self, X):
         """
@@ -68,10 +68,8 @@ class linear_layer:
         ################################################################################
         # TODO: Implement the linear forward pass. Store the result in forward_output  #
         ################################################################################
-        X_shape = np.shape(X)
-        forward_output = np.matmul(np.dstack([self.params['W']] * X_shape[0]).T, X.T)[0] \
-                         + np.dstack([self.params['b']] * X_shape[0])[0]
-        return forward_output.T
+        forward_output = np.add(np.matmul(X, self.params['W']), self.params['b'])
+        return forward_output
 
     def backward(self, X, grad):
         """
