@@ -166,7 +166,10 @@ class KMeansClassifier():
         for c in range(self.n_cluster):
             temp = (membership * [y == c])
             unique_elements, counts_elements = np.unique(temp[temp != 0], return_counts=True)
-            centroid_labels.append(unique_elements[np.argmax(counts_elements)])
+            if unique_elements.any():
+                centroid_labels.append(unique_elements[np.argmax(counts_elements)])
+            else:
+                centroid_labels.append(0)
         
         # DONOT CHANGE CODE BELOW THIS LINE
 
@@ -229,10 +232,16 @@ def transform_image(image, code_vectors):
     # - implement the function
 
     # DONOT CHANGE CODE ABOVE THIS LINE
-    raise Exception(
-             'Implement transform_image function')
-    
+    rows, cols = image.shape[0], image.shape[1]
+    image = image.reshape(image.shape[2], -1).T
+    distances = np.zeros([image.shape[0], code_vectors.shape[0]], dtype=np.float64)
 
+    for i2, c in enumerate(code_vectors):
+        distances[:, i2] = np.linalg.norm(image - c, axis=1) ** 2
+
+    new_im = code_vectors[np.argmin(distances, axis=1)]
+
+    new_im = np.reshape(new_im, (rows, cols, 3))
     # DONOT CHANGE CODE BELOW THIS LINE
     return new_im
 
