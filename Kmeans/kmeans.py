@@ -164,10 +164,10 @@ class KMeansClassifier():
         centroids, membership, i = k_means.fit(x, centroid_func)
         centroid_labels = []
         for c in range(self.n_cluster):
-            temp = (membership * [y == c])
-            unique_elements, counts_elements = np.unique(temp[temp != 0], return_counts=True)
-            if unique_elements.any():
-                centroid_labels.append(unique_elements[np.argmax(counts_elements)])
+            temp = y[membership == c]
+            counts = np.bincount(temp)
+            if counts.any():
+                centroid_labels.append(np.argmax(counts))
             else:
                 centroid_labels.append(0)
         
