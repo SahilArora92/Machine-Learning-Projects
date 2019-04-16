@@ -35,8 +35,12 @@ class HMM:
         alpha = np.zeros([S, L])
         ###################################################
         # Edit here
+        alpha = alpha.T
+        alpha[0] = self.pi * self.B[:, self.obs_dict[Osequence[0]]]
+        for t in range(1, L):
+            alpha[t] = self.B[:, self.obs_dict[Osequence[t]]] * np.dot(alpha[t-1], self.A)
         ###################################################
-        return alpha
+        return alpha.T
 
     # TODO:
     def backward(self, Osequence):
@@ -54,7 +58,10 @@ class HMM:
         L = len(Osequence)
         beta = np.zeros([S, L])
         ###################################################
-        # Edit here
+        beta[:, -1:] = 1
+        for t in reversed(range(L-1)):
+            for n in range(S):
+                beta[n, t] = np.sum(self.A[n, :] * self.B[:, self.obs_dict[Osequence[t+1]]] * beta[:, t + 1])
         ###################################################
         return beta
 
@@ -69,7 +76,8 @@ class HMM:
         """
         prob = 0
         ###################################################
-        # Edit here
+        alpha = self.forward(Osequence)
+        prob = np.sum(alpha, axis=0)[-1]
         ###################################################
         return prob
 
@@ -84,7 +92,10 @@ class HMM:
         """
         prob = 0
         ###################################################
-        # Edit here
+        alpha = self.forward(Osequence)
+        beta = self.backward(Osequence)
+        seq_prob = np.sum(alpha, axis=0)[-1]
+        prob = np.multiply(alpha, beta)/seq_prob
         ###################################################
         return prob
 
@@ -97,8 +108,27 @@ class HMM:
         Returns:
         - path: A List of the most likely hidden state path k* (return state instead of idx)
         """
-        path = []
+
         ###################################################
-        # Edit here
+        L = len(Osequence)
+        S = len(self.pi)
+        path = np.zeros(L, dtype=np.int32)
+        delta = np.zeros((L, S))
+        cap_delta = np.zeros((L, S))
+
+        delta[0] = self.pi * self.B[:, self.obs_dict[Osequence[0]]]
+        for t in range(1, L):
+            for s in range(S):
+                delta[t, s] = self.B[s, self.obs_dict[Osequence[t]]] * np.max(self.A[:, s] * delta[t - 1])
+                cap_delta[t, s] = np.argmax(self.A[:, s] * delta[t - 1])
+
+        path[L-1] = np.argmax(delta[L-1])
+        for t in range(L - 2, -1, -1):
+            path[t] = cap_delta[t + 1, path[t + 1]]
+
+        # map actual state path from state_dict
+        state_dict = {y: x for x, y in self.state_dict.items()}
+        path = np.vectorize(state_dict.get)(path)
+
         ###################################################
-        return path
+        return path.tolist()
