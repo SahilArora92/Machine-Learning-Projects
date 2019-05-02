@@ -90,6 +90,7 @@ def model_training(train_data, tags):
 	total_lines = len(train_data)
 	state_dict = {tags[i]: i for i in range(len(tags))}
 	pi = np.zeros([S])
+	# states_count = np.zeros([S])
 	A = np.zeros([S, S])
 
 	outcome_tag_dict = {}
@@ -100,6 +101,7 @@ def model_training(train_data, tags):
 		pi[state_dict[line.tags[0]]] += 1
 
 		for curr_ind in range(line.length):
+			# states_count[state_dict[line.tags[curr_ind]]] += 1
 
 			if not (line.tags[curr_ind], line.words[curr_ind]) in outcome_tag_dict:
 				outcome_tag_dict[(line.tags[curr_ind], line.words[curr_ind])] = 1
@@ -112,21 +114,48 @@ def model_training(train_data, tags):
 
 			if curr_ind == line.length - 1:
 				continue
+			# states_count[state_dict[line.tags[curr_ind + 1]]] += 1
 			A[state_dict[line.tags[curr_ind]]][state_dict[line.tags[curr_ind + 1]]] += 1
-
-	# initialize B and populate it from outcome_tag_dict
 	B = np.zeros((S, len(outcome_dict)))
 	for key, item in outcome_tag_dict.items():
 		B[state_dict[key[0]]][outcome_dict[key[1]]] = item
 
+	# remove unnecessary states
+	indxs = find_removal_index(A)
+	if indxs:
+		pi = np.delete(pi, indxs)
+		state_dict = switch_key_value_dict(state_dict)
+		for ind in indxs:
+			del state_dict[ind]
+		state_dict = switch_key_value_dict(state_dict)
+	# remove rows containing zero
+	B = B[~np.all(B == 0, axis=1)]
+	A = A[~np.all(A == 0, axis=1)]
+	A = A.T[~np.all(A == 0, axis=0)]
+	A = A.T
+
 	# compute probabilities and normalize
-	B = np.nan_to_num(B/np.reshape(np.sum(B, axis=1), (S, 1)))
+	B = np.nan_to_num(B / np.sum(B, axis=0))
 	pi = pi / total_lines
+
 	A = np.nan_to_num(A / np.sum(A, axis=1))
 
 	model = HMM(pi, A, B, outcome_dict, state_dict)
 
+
 	return model
+
+
+def switch_key_value_dict(state_dict):
+	return {y: x for x, y in state_dict.items()}
+
+
+def find_removal_index(arr):
+	arg = np.argwhere(np.sum(arr, axis=0) == 0)
+	if arg:
+		return np.reshape(arg, (1,))
+	return None
+
 
 
 # TODO:
@@ -141,15 +170,7 @@ def speech_tagging(test_data, model, tags):
 	"""
 	tagging = []
 	###################################################
-	count = list(model.obs_dict.items())[-1][1]
-	S = len(tags)
-	new_col = np.zeros((S, 1)) + (10**-6)
 	for line in test_data:
-		for word in line.words:
-			if not word in model.obs_dict:
-				count = count+1
-				model.obs_dict[word] = count
-				model.B = np.hstack((model.B, new_col))
-		tagging.append(model.viterbi(line.words))
+		tg = model.viterbi(line.words)
 	###################################################
 	return tagging
